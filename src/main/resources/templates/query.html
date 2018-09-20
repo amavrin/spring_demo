@@ -1,0 +1,16 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Getting Started: Serving Web Content</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+<p th:text="'Произведён поиск слова ' + ${query} + '!'" />
+<table class="paleBlueRows">
+<tr th:each="article: ${result}">
+    <td th:text="${article}"></td>
+</tr>
+</table>
+</body>
+</html>
