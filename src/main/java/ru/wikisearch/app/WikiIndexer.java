@@ -22,35 +22,35 @@ public class WikiIndexer {
         this.indexdir = indexDir;
     }
 
-    public void DoIndex() throws Exception {
+    public String DoIndex() throws Exception {
         File wikipediafile = new File(dumpname);
         if (!wikipediafile.exists()) {
             System.out.println("Can't find "
                     + wikipediafile.getAbsolutePath());
-            return;
+            return "Не найден дамп Википедии: " + wikipediafile.getAbsolutePath();
         }
         if (!wikipediafile.canRead()) {
             System.out.println("Can't read "
                     + wikipediafile.getAbsolutePath());
-            return;
+            return "Ошибка открытия дампа Википедии на чтение: " + wikipediafile.getAbsolutePath();
         }
         File outputDir = new File(this.indexdir);
         if (!outputDir.exists()) {
             if (!outputDir.mkdirs()) {
                 System.out.println("couldn't create "
                         + outputDir.getAbsolutePath());
-                return;
+                return "Ошибка создания каталога индекса: " + outputDir.getAbsolutePath();
             }
         }
         if (!outputDir.isDirectory()) {
             System.out.println(outputDir.getAbsolutePath()
                     + " is not a directory!");
-            return;
+            return "Путь, указанный как имя каталога индекса, не является каталогом: " + outputDir.getAbsolutePath();
         }
         if (!wikipediafile.canWrite()) {
             System.out.println("Can't write to "
                     + outputDir.getAbsolutePath());
-            return;
+            return "Ошибка записи в каталог индекса: " + outputDir.getAbsolutePath();
         }
 
         // we should be "ok" now
@@ -144,6 +144,8 @@ public class WikiIndexer {
                 + dir.getDirectory().toAbsolutePath());
         indexWriter.close();
 
+        String ret = "Индексировано " + count + " документов за " + (finish - start)/1000 + " секунд";
+        return ret;
     }
     public ArrayList DoQuery(String searchStr, int nArticles) {
         ArrayList QueryResult = new ArrayList();

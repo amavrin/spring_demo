@@ -14,12 +14,13 @@ public class IndexController {
         model.addAttribute("dumpname", dumpname);
         model.addAttribute("indexdir", indexdir);
         WikiIndexer indexer = new WikiIndexer(dumpname, indexdir);
+        String status = null;
         try {
-            indexer.DoIndex();
+            status = indexer.DoIndex();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        model.addAttribute("status", status);
         return "reindex";
     }
 }
