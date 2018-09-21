@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class IndexController {
     @GetMapping("/reindex")
-    public String reindex(@RequestParam(name="dumpname", required=false, defaultValue="dump\\sample.xml.bz2") String dumpname,
-                          @RequestParam(name="indexdir", required=false, defaultValue="dump\\index") String indexdir,
+    public String reindex(@RequestParam(name="dumpname", required=false,defaultValue="sample.xml.bz2") String dumpname,
+                          @RequestParam(name="indexdir", required=false, defaultValue="index") String indexdir,
                           Model model) {
         model.addAttribute("dumpname", dumpname);
         model.addAttribute("indexdir", indexdir);

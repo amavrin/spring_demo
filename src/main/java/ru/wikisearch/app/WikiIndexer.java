@@ -147,8 +147,57 @@ public class WikiIndexer {
         String ret = "Индексировано " + count + " документов за " + (finish - start)/1000 + " секунд";
         return ret;
     }
-    public ArrayList DoQuery(String searchStr, int nArticles) {
-        ArrayList QueryResult = new ArrayList();
+    public String DisplayArticleById (String id) {
+        String Article = null;
+
+        File idir = new File(indexdir);
+        FSDirectory dir = null;
+        try {
+            dir = FSDirectory.open(idir.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        IndexReader reader = null;
+        try {
+            reader = DirectoryReader.open(dir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        IndexSearcher searcher = new IndexSearcher(reader);
+
+        Query query = new TermQuery(new Term("docid", id));
+        TopDocs hits = null;
+        try {
+            hits = searcher.search(query, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        for(ScoreDoc hit: hits.scoreDocs) {
+            Document document = null;
+
+            try {
+                document = searcher.doc(hit.doc);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Hit: ");
+            for(IndexableField iff : document.getFields()) {
+                String content = document.get(iff.name());
+                System.out.println(iff.name()+ " : " + content);
+                if (iff.name().equals("body") ) {
+                    System.out.println("add to result:" + content);
+                    Article = content;
+                }
+            }
+        }
+
+        return Article;
+
+    }
+    public ArrayList<HashMap> DoQuery(String searchStr, int nArticles) {
+        ArrayList<HashMap> QueryResult = new ArrayList<HashMap>();
+        HashMap Entry = null;
 
         System.out.println("We are going to test the index by querying the word '" + searchStr + "' and getting the top 3 documents:");
 
@@ -184,15 +233,22 @@ public class WikiIndexer {
                 e.printStackTrace();
             }
             System.out.println("Hit: ");
+            Entry = new HashMap();
             for(IndexableField iff : document.getFields()) {
                 String content = document.get(iff.name());
                 if(content.length() > 400) content = content.substring(0,400)+"...";
                 System.out.println(iff.name()+ " : " + content);
+                if (iff.name().equals("docid") ) {
+                    Entry.put("docid", content);
+                }
+                if (iff.name().equals("title") ) {
+                    Entry.put("title", content);
+                }
                 if (iff.name().equals("body") ) {
-                    System.out.println("add to result:" + content);
-                    QueryResult.add(content);
+                    Entry.put("body", content);
                 }
             }
+            QueryResult.add(Entry);
         }
 
         return QueryResult;

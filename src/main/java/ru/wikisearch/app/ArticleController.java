@@ -6,26 +6,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 @Controller
-public class QueryController {
-    @GetMapping("/query")
+public class ArticleController {
+    @GetMapping("/article")
     public String query(@RequestParam(name="dumpname", required=false, defaultValue="sample.xml.bz2") String dumpname,
                         @RequestParam(name="indexdir", required=false, defaultValue="index") String indexdir,
-                        @RequestParam(name="query") String query,
-                        @RequestParam(name="count", required=false, defaultValue="5") String count,
+                        @RequestParam(name="id") String id,
                         Model model) {
-        int nArticles = Integer.parseInt(count);
-        model.addAttribute("query", query);
         WikiIndexer indexer = new WikiIndexer(dumpname, indexdir);
-        ArrayList<HashMap> QueryResult = null;
+        String Article = null;
         try {
-            QueryResult = indexer.DoQuery(query, nArticles);
+            Article = indexer.DisplayArticleById(id);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        model.addAttribute("result", QueryResult);
-        return "query";
+        model.addAttribute("article", Article);
+        return "article";
     }
 }

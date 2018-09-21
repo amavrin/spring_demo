@@ -8,9 +8,12 @@
 <body>
 <p th:text="'Произведён поиск слова ' + ${query} + '!'" />
 <table class="paleBlueRows">
-<tr th:each="article: ${result}">
-    <td th:text="${article}"></td>
-</tr>
+    <tr th:each="map : ${result}">
+        <td> <a th:href="'/article?id=' + ${map.docid}"> view article </a></td>
+         <td th:text="${map.title}"></td>
+         <td th:text="${map.body}"></td>
+    </tr>
+
 </table>
 </body>
 </html>
