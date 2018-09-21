@@ -11,6 +11,7 @@ import org.apache.lucene.index.*;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.search.*;
 import org.apache.lucene.benchmark.byTask.feeds.EnwikiContentSource;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.ru.RussianAnalyzer;
 
 public class WikiIndexer {
@@ -53,37 +54,33 @@ public class WikiIndexer {
             return "Ошибка записи в каталог индекса: " + outputDir.getAbsolutePath();
         }
 
-        // we should be "ok" now
-
         FSDirectory dir = FSDirectory.open(outputDir.toPath());
 
-        RussianAnalyzer analyzer = new RussianAnalyzer();
+//        RussianAnalyzer analyzer = new RussianAnalyzer();
+        EnglishAnalyzer analyzer = new EnglishAnalyzer();
+
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
-        config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);// overwrites
-        // if
-        // needed
+        config.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+
         IndexWriter indexWriter = new IndexWriter(dir, config);
 
         DocMaker docMaker = new DocMaker();
         Properties properties = new Properties();
-        properties.setProperty("content.source.forever", "false"); // will
-        // parse
-        // each
-        // document
-        // only
-        // once
+        properties.setProperty("content.source.forever", "false");
+
         properties.setProperty("docs.file",
                 wikipediafile.getAbsolutePath());
         properties.setProperty("keep.image.only.docs", "false");
         Config c = new Config(properties);
         EnwikiContentSource source = new EnwikiContentSource();
+
         source.setConfig(c);
-        source.resetInputs();// though this does not seem needed, it is
-        // (gets the file opened?)
+        source.resetInputs();
         docMaker.setConfig(c, source);
+
         int count = 0;
         int bodycount = 0;
-        System.out.println("Starting Indexing of Wikipedia dump "
+        System.out.println("Начало индексирования дампа Википедии "
                 + wikipediafile.getAbsolutePath());
         long start = System.currentTimeMillis();
         Document doc;
@@ -121,35 +118,34 @@ public class WikiIndexer {
                 ++count;
 
                 if(false && count == 100) {
-                    System.out.println("test run. 100 document indexed, break");
+                    System.out.println("Тестовый прогон, 100 документов. Остановка.");
                     break;
                 }
                 if (count % 1000 == 0)
                     System.out
-                            .println("Indexed "
+                            .println("Индексировано документов: "
                                     + count
-                                    + " documents ("+bodycount+" bodies) in "
+                                    + ", полей: "+bodycount+", время: "
                                     + (System
                                     .currentTimeMillis() - start)
-                                    + " ms");
+                                    + " миллисекунд");
 
             }
         } catch (org.apache.lucene.benchmark.byTask.feeds.NoMoreDataException nmd) {
             nmd.printStackTrace();
         }
         long finish = System.currentTimeMillis();
-        System.out.println("Indexing " + count + " documents took "
-                + (finish - start) + " ms");
-        System.out.println("Index should be located at "
+        String indexResult = "Индексировано документов: "
+                + count + ". Время индексации (секунд): " + (finish - start)/1000;
+        System.out.println(indexResult);
+        System.out.println("Индекс расположен в "
                 + dir.getDirectory().toAbsolutePath());
         indexWriter.close();
 
-        String ret = "Индексировано " + count + " документов за " + (finish - start)/1000 + " секунд";
-        return ret;
+        return indexResult;
     }
-    public String DisplayArticleById (String id) {
-        String Article = null;
 
+    private IndexSearcher myIndexSearcher() {
         File idir = new File(indexdir);
         FSDirectory dir = null;
         try {
@@ -164,6 +160,13 @@ public class WikiIndexer {
             e.printStackTrace();
         }
         IndexSearcher searcher = new IndexSearcher(reader);
+        return searcher;
+    }
+
+    public String DisplayArticleById (String id) {
+        String Article = null;
+
+        IndexSearcher searcher = myIndexSearcher();
 
         Query query = new TermQuery(new Term("docid", id));
         TopDocs hits = null;
@@ -195,26 +198,15 @@ public class WikiIndexer {
         return Article;
 
     }
+
     public ArrayList<HashMap> DoQuery(String searchStr, int nArticles) {
         ArrayList<HashMap> QueryResult = new ArrayList<HashMap>();
         HashMap Entry = null;
 
-        System.out.println("We are going to test the index by querying the word '" + searchStr + "' and getting the top 3 documents:");
+        System.out.println("Поиск слова '" + searchStr + "', максимальное количество: "
+                + nArticles);
 
-        File idir = new File(indexdir);
-        FSDirectory dir = null;
-        try {
-            dir = FSDirectory.open(idir.toPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        IndexReader reader = null;
-        try {
-            reader = DirectoryReader.open(dir);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        IndexSearcher searcher = new IndexSearcher(reader);
+        IndexSearcher searcher = myIndexSearcher();
 
         Query query = new TermQuery(new Term("body", searchStr));
         TopDocs hits = null;
@@ -232,7 +224,6 @@ public class WikiIndexer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.println("Hit: ");
             Entry = new HashMap();
             for(IndexableField iff : document.getFields()) {
                 String content = document.get(iff.name());
