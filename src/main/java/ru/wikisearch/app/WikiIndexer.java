@@ -195,6 +195,7 @@ public class WikiIndexer {
             }
         }
 
+        Article = RemoveWikiFormat.removeFormat(Article);
         return Article;
 
     }
@@ -227,7 +228,7 @@ public class WikiIndexer {
             Entry = new HashMap();
             for(IndexableField iff : document.getFields()) {
                 String content = document.get(iff.name());
-                if(content.length() > 400) content = content.substring(0,400)+"...";
+                //if(content.length() > 400) content = content.substring(0,400)+"...";
                 System.out.println(iff.name()+ " : " + content);
                 if (iff.name().equals("docid") ) {
                     Entry.put("docid", content);
@@ -236,7 +237,8 @@ public class WikiIndexer {
                     Entry.put("title", content);
                 }
                 if (iff.name().equals("body") ) {
-                    Entry.put("body", content);
+                    String str = RemoveWikiFormat.removeFormat(content);
+                    Entry.put("body", str);
                 }
             }
             QueryResult.add(Entry);
