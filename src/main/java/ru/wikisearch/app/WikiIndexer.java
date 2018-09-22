@@ -237,8 +237,18 @@ public class WikiIndexer {
                     Entry.put("title", content);
                 }
                 if (iff.name().equals("body") ) {
-                    String str = RemoveWikiFormat.removeFormat(content);
-                    Entry.put("body", str);
+                    //String str = RemoveWikiFormat.removeFormat(content);
+                    String str = content;
+                    int nquot = 5;
+                    Splitter splitter = new Splitter(6, nquot);
+                    String[] res = splitter.split(str, searchStr);
+                    String str2 = res[0];
+                    for (int i = 1; i < nquot; i++) {
+                        if (res[i] != null) {
+                            str2 +=  " ... " + res[i];
+                        }
+                    }
+                    Entry.put("body", str2);
                 }
             }
             QueryResult.add(Entry);

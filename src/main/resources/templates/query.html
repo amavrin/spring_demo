@@ -6,7 +6,7 @@
     <link href="style.css" rel="stylesheet">
 </head>
 <body>
-<p th:text="'Произведён поиск слова ' + ${query} + '!'" />
+<p th:text="'Произведён поиск слова <<' + ${query} + '>>'" />
 <table class="paleBlueRows">
     <tr th:each="map : ${result}">
         <td> <a th:href="'/article?id=' + ${map.docid}"> view article </a></td>
