@@ -195,7 +195,7 @@ public class WikiIndexer {
             }
         }
 
-        Article = RemoveWikiFormat.removeFormat(Article);
+        // Article = RemoveWikiFormat.removeFormat(Article);
         return Article;
 
     }
