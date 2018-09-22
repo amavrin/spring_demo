@@ -17,7 +17,7 @@ public class Splitter {
         String[] result = new String[max];
         int index = 0;
         for (int i = 0; i < list.length; i++) {
-            if (list[i].matches(word)) {
+            if (list[i].matches("(?i:.*" + word + ".*)")) {
                 String a = list[i];
                 for (int j = i - 1; j>=0 && j>=i-dist; j--) {
                     a = list[j] + " " + a;
